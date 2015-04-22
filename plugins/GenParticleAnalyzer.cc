@@ -113,6 +113,11 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
   for(size_t i = 0; i < genParticles->size(); ++ i) { 
     const GenParticle & part = (*genParticles)[i];
     int id = part.pdgId(), st = part.status() ; 
+
+    if ( abs(id) == 6000006 ) {
+      h1_["pttp"] -> Fill(part.pt()) ; 
+    }
+
     if ( abs(id) == 6 && ( abs(st) >=21 && abs(st) <=29) ) {
       TLorentzVector p4l, p4n ; 
       unsigned ndau = part.numberOfDaughters() ; 
@@ -158,107 +163,6 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
     } //// top quark found 
   } //// particle loop
 
-
-  /*
-     for(size_t i = 0; i < genParticles->size(); ++ i) {
-     const GenParticle & p = (*genParticles)[i];
-     int id = p.pdgId();
-     int st = p.status();  
-  //double pt = p.pt(), eta = p.eta(), phi = p.phi(), mass = p.mass();
-  //double vx = p.vx(), vy = p.vy(), vz = p.vz();
-  //int charge = p.charge();
-
-  if ( abs(id) == 25 && ( st >= 21 && st <= 29) ) {
-  unsigned n = p.numberOfDaughters();
-  for(size_t j = 0; j < n; ++ j) {
-  const Candidate * d = p.daughter( j );
-  int dauId = d->pdgId();
-  if ( abs(dauId) == 24 ) {
-  h1_["MWfromHgen"]->Fill(d->mass()) ;
-  }
-  }
-  }
-
-  if ( abs(id) == 6 && ( st >= 21 && st <= 29) ) {
-  unsigned n = p.numberOfDaughters();
-  for(size_t j = 0; j < n; ++ j) {
-  const Candidate * d = p.daughter( j );
-  int dauId = d->pdgId();
-  if ( abs(dauId) == 24 ) {
-  h1_["MWfromtgen"]->Fill(d->mass()) ;
-  unsigned ngd = d->numberOfDaughters() ;
-
-  TLorentzVector p4l, p4n ; 
-
-  if ( ngd == 1 && abs(d->daughter( 0 )->pdgId() == 24) )  {
-  const Candidate *dau = d->daughter(0) ; 
-  unsigned nggd = dau->numberOfDaughters() ;
-  if ( nggd == 1 && abs(dau->daughter( 0 )->pdgId() == 24) )  {
-  cout << "W undecayed\n" ; 
-  }
-  else {
-  for ( size_t iggd = 0; iggd < nggd; ++iggd ) {
-  const Candidate* ggdau = dau->daughter( iggd ) ; 
-  int ggdauid = ggdau->pdgId() ; 
-  if ( abs(ggdauid) == 11 || abs(ggdauid) == 13 || abs(ggdauid) == 15 ) {
-  p4l.SetPtEtaPhiM( ggdau->pt(), ggdau->eta(), ggdau->phi(), ggdau->mass() ) ; 
-  }
-  if ( abs(ggdauid) == 12 || abs(ggdauid) == 14 || abs(ggdauid) == 16 ) {
-  p4l.SetPtEtaPhiM( ggdau->pt(), ggdau->eta(), ggdau->phi(), ggdau->mass() ) ; 
-  }
-  }
-  }
-  }
-  else {
-  for ( size_t i = 0; i < ngd; ++i ) {
-  const Candidate * gd = d->daughter( i );
-  int gdid = gd->pdgId() ; 
-  cout << " W dau id " << gdid << " status " << gd->status() << endl ; 
-  if ( abs(gdid) == 11 || abs(gdid) == 13 || abs(gdid) == 15 ) {
-  p4l.SetPtEtaPhiM( gd->pt(), gd->eta(), gd->phi(), gd->mass() ) ; 
-  }
-  if ( abs(gdid) == 12 || abs(gdid) == 14 || abs(gdid) == 16 ) {
-  p4l.SetPtEtaPhiM( gd->pt(), gd->eta(), gd->phi(), gd->mass() ) ; 
-  }
-  }
-  }
-  cout << " ptl " << p4l.Pt() << " ptn " << p4n.Pt() << " Mlnugen " << (p4l+p4n).Mag() << " Mtlnugen " << (p4l+p4n).Mt() << endl ; 
-  if (p4l.Pt() > 0 && p4n.Pt() > 0) {
-  h1_["Mtlnugen"] -> Fill( (p4l+p4n).Mt() ) ; 
-  h1_["Mlnugen"]->Fill( (p4l+p4n).Mag() ) ;
-  }
-  }
-  }
-  }
-
-  //if ( abs(id) == 24 && ( st >= 21 && st <= 29) ) {
-  //  p4w.SetPtEtaPhiM(pt, eta, phi, mass) ;
-  //  h1_["MWgen"]->Fill(p4w.Mag()) ; 
-  //  bool lepw(false) ; 
-  //  unsigned n = p.numberOfDaughters();
-  //  for(size_t j = 0; j < n; ++ j) {
-  //    const Candidate * d = p.daughter( j );
-  //    int dauId = d->pdgId();
-  //    //int daust = d->status() ; 
-
-  //    //if ( abs(dauId) == 24 && daust == 52)
-
-  //    double daupt = d->pt(), daueta = d->eta(), dauphi = d->phi(), daumass = d->mass() ; 
-  //    if ( abs(dauId) == 11 || abs(dauId) == 13 || abs(dauId) == 15 ) { lepw = true ; p4l.SetPtEtaPhiM(daupt, daueta, dauphi, daumass) ; } 
-  //    if ( abs(dauId) == 12 || abs(dauId) == 14 || abs(dauId) == 16 ) { lepw = true ; p4nu.SetPtEtaPhiM(daupt, daueta, dauphi, daumass) ; } 
-  //  }
-  //  if ( lepw ) {
-  //    p4lnu = p4l+p4nu ; 
-  //    h1_["Mlnugen"]->Fill(p4lnu.Mag()) ;
-  //  }
-  //} // W particle
-
-  //const Candidate * mom = p.mother();
-  //const Candidate * grandmom = mom->mother();
-}
-*/
-
-
 }
 
 
@@ -267,6 +171,9 @@ GenParticleAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iS
 GenParticleAnalyzer::beginJob()
 {
   TFileDirectory results = TFileDirectory( fs->mkdir("results") );
+
+  h1_["pttp"] = fs->make<TH1D>("pttp", ";p_{T}(T);;", 200, 0., 1000.) ; 
+
   h1_["ptWfromtgen"] = fs->make<TH1D>("ptWfromtgen", ";p_{T}(W);;", 200, 0., 1000.) ;  
   h1_["MtWfromtgen"] = fs->make<TH1D>("MtWfromtgen", ";M_{T}(W);;", 200, 0., 1000.) ;  
   h1_["MWfromtgen"] = fs->make<TH1D>("MWfromtgen", ";M(W);;", 100, 0., 100.) ;  
